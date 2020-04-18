@@ -9,26 +9,32 @@ import re
 DOMAINS = {
   'superstore': 'www.realcanadiansuperstore.ca',
   'loblaws': 'www.loblaws.ca',
+  'valumart': 'www.valumart.ca',
+  'nofrills': 'www.nofrills.ca',
+  'zehrs': 'www.zehrs.ca',
 }
 SITE_BANNERS = {
   'superstore': 'superstore',
   'loblaws': 'loblaw',
+  'valumart': 'valumart',
+  'nofrills': 'nofrills',
+  'zehrs': 'zehrs',
 }
 
 # From https://stackoverflow.com/a/15586020
 class Reprinter:
   def __init__(self):
     self.text = ''
-
+  
   def moveup(self, lines):
     for _ in range(lines):
       sys.stdout.write("\x1b[A")
-
+  
   def reprint(self, text):
     # Clear previous text by overwritig non-spaces with spaces
     self.moveup(self.text.count("\n"))
     sys.stdout.write(re.sub(r"[^\s]", " ", self.text))
-
+    
     # Print new text
     lines = min(self.text.count("\n"), text.count("\n"))
     self.moveup(lines)
@@ -86,14 +92,14 @@ def main():
     help='Timezone offset in hours. Default seems to work for both Toronto and Calgary')
   parser.add_argument('--announce', action='store_true',
     help='Announce new open slots via Chromecast device (including Google home')
-  parser.add_argument('--site', choices=('loblaws', 'superstore'), default='loblaws',
+  parser.add_argument('--site', choices=('loblaws', 'superstore', 'valumart', 'nofrills', 'zehrs'), default='loblaws',
     help='Type of PC-umbrella grocery store')
   args = parser.parse_args()
-
+  
   init_cookies = get_cookies(args.site)
   rep = Reprinter()
   prev_first_slot = None
-
+  
   while True:
     slots = check_slots(args.site, args.location, init_cookies, args.tzoffset)
     if args.announce and len(slots) > 0 and slots[0] != prev_first_slot:
@@ -101,7 +107,7 @@ def main():
       saytime = slots[0].strftime('The next available grocery pickup slot is on %A, %B %d at %I %p.')
       saytext.say(saytime)
       prev_first_slot = slots[0]
-
+    
     now = datetime.datetime.now()
     out = ['last_checked = %s' % now.strftime('%H:%M:%S')]
     out.append('next_check = %s' % (now + datetime.timedelta(seconds=args.delay)).strftime('%H:%M:%S'))
