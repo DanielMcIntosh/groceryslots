@@ -47,7 +47,7 @@ def make_header(site):
   return headers
 
 def fetch(site, location, cookies):
-  r = requests.get('https://%s/api/pickup-locations/%s/time-slots' % (DOMAINS[site], location), cookies=cookies, headers=make_header(site))
+  r = requests.get('https://%s/api/pickup-locations/%04d/time-slots' % (DOMAINS[site], location), cookies=cookies, headers=make_header(site))
   return r.json()
 
 def get_cookies(site):
